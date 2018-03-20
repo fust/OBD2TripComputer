@@ -1,5 +1,5 @@
 # OBD2TripComputer
-Arduino OBD2 trip computer
+Arduino OBD2 trip computer, see https://thomwijtenburg.nl/arduino-obd-2-trip-computer/
 
 # Hardware
 - Arduino Mega 2560
