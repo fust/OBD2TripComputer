@@ -40,33 +40,43 @@ void setup() {
 }
 
 void loop() {
-  obd.readPID(PID_RPM, rpm);
-  if (rpm != prevRpm) {
-    prevRpm = rpm;
-    char buf[15];
-    sprintf(buf, "RPM: %i      ", rpm);
-    tft.drawString(buf, 0, (4 * tft.fontHeight(4)), 4);
+  int errors = 0;
+  if (obd.readPID(PID_RPM, rpm, 1)) {
+    if (rpm != prevRpm) {
+      prevRpm = rpm;
+      char buf[15];
+      sprintf(buf, "RPM: %i      ", rpm);
+      tft.drawString(buf, 0, (4 * tft.fontHeight(4)), 4);
+    }
+  } else {
+    errors++;
   }
 
-  obd.readPID(PID_COOLANT_TEMP, ect);
-  if (ect != prevEct) {
-    prevEct = ect;
-    char buf2[15];
-    sprintf(buf2, "ECT: %i C    ", ect);
-    tft.drawString(buf2, 0, (5 * tft.fontHeight(4)), 4);
+  if (obd.readPID(PID_COOLANT_TEMP, ect, 1)) {
+    if (ect != prevEct) {
+      prevEct = ect;
+      char buf2[15];
+      sprintf(buf2, "ECT: %i C    ", ect);
+      tft.drawString(buf2, 0, (5 * tft.fontHeight(4)), 4);
+    }
+  } else {
+    errors++;
   }
 
-  obd.readPID(PID_SPEED, speed);
-  if (speed != prevSpeed) {
-    prevSpeed = speed;
-    char buf3[18];
-    sprintf(buf3, "SPD: %i KM/h     ", speed);
-    tft.drawString(buf3, 0, (6 * tft.fontHeight(4)), 4);
+  if (obd.readPID(PID_SPEED, speed, 1)) {
+    if (speed != prevSpeed) {
+      prevSpeed = speed;
+      char buf3[18];
+      sprintf(buf3, "SPD: %i KM/h     ", speed);
+      tft.drawString(buf3, 0, (6 * tft.fontHeight(4)), 4);
+    }
+  } else {
+    errors++;
   }
 
   if (speed > 0) {
-    obd.readPID(PID_MAF_FLOW, maf);
-    obd.readPID(PID_ENGINE_LOAD, load);  
+    obd.readPID(PID_MAF_FLOW, maf, 1);
+    obd.readPID(PID_ENGINE_LOAD, load, 1);  
     /*
      * Calculate consumption. This is done using the following formula:
      * FuelFlow (Litres/Hour) =  a * (Airflow (g/s) * Load (%)) + b
@@ -109,7 +119,7 @@ void loop() {
     graph.plot(0);
   }
 
-  if (digitalRead(BT_STATE) == 0) {
+  if (digitalRead(BT_STATE) == 0 || errors > 2) {
     tft.fillScreen(TFT_BLACK);
     initialize();
   }
